@@ -51,10 +51,9 @@ const VideoPlayer = () => {
     });
   };
 
-  const endInterval = (enTime) => {
-    const targetVideo = user.videodata.find(
-      (video) => video.videoId === "video456"
-    );
+  const endInterval = (enTime, resumePoint=null) => {
+    const targetVideo = user.videodata[0];
+    if(targetVideo.watchedIntervals.length === 0) return;
     let lastInterval = targetVideo.watchedIntervals.pop();
     lastInterval = { ...lastInterval, end: enTime };
 
@@ -72,6 +71,10 @@ const VideoPlayer = () => {
         return video;
       });
 
+      if (resumePoint !== null) {
+        updatedVideoData[0].resumePoint = resumePoint;
+      }
+
       return {
         ...prevData,
         videodata: updatedVideoData,
@@ -87,7 +90,7 @@ const VideoPlayer = () => {
       setIsPlaying(true);
     } else {
       video.pause();
-      endInterval(video.currentTime);
+      endInterval(video.currentTime, video.currentTime);
       setIsPlaying(false);
     }
   };
@@ -123,14 +126,20 @@ const VideoPlayer = () => {
     video.addEventListener("loadedmetadata", () =>
       setProgress((user.videodata[0].resumePoint / user.videodata[0].videoLength) * 100)
     );
+    
     const handleVideoEnd = () => {
       endInterval(video.duration);
       setIsPlaying(false);
     };
     video.addEventListener("ended", handleVideoEnd);
+    
     const timer = setTimeout(() => {
       setShowSkeleton(false);
     }, 4000);
+
+      // const periodicTime = setInterval(() => {
+      //   console.log(video.currentTime);
+      // }, 5000);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -145,6 +154,10 @@ const VideoPlayer = () => {
     }, 0);
     return ((metric / user.videodata[0].videoLength) * 100).toFixed(2);
   };
+
+  useEffect(()=>{
+    console.log(user);
+  },[user])
 
   return (
     <div className="player" style={{ position: "relative" }}>
