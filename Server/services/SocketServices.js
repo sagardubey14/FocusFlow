@@ -1,4 +1,3 @@
-const { updateVideoDataByEmail } = require("../controllers/userController");
 const User = require("../models/User");
 
 
