@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { addUsers } = require('../services/SocketServices');
 
 const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
@@ -54,6 +55,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid password.' });
     }
 
+    addUsers(email, user.videoData);
     return res.status(200).json({ message: 'Login successful.', user: { username: user.username, videodata:user.videoData } });
   } catch (error) {
     console.error(error);
@@ -61,4 +63,23 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const updateVideoDataByEmail = async (email, newVideoData)=> {
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.videoData = newVideoData.map(({ _id, ...rest }) => ({
+      ...rest,
+    }));
+    
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    console.error('Error updating videoData:', error.message);
+    throw error;
+  }
+}
+
+module.exports = { registerUser, loginUser, updateVideoDataByEmail };

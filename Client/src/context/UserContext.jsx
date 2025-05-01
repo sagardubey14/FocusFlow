@@ -9,7 +9,7 @@ export const UserProvider = ({children})=>{
             {
                 "videoId": "video456",
                 "watchedIntervals": [],
-                "resumePoint": 0,
+                "resumePoint": 80,
                 "videoLength": 224.327982,
                 "_id": "681350abb940cd95f6489290"
             }
@@ -26,3 +26,4 @@ export const UserProvider = ({children})=>{
 export const useUser = () => {
     return useContext(UserContext);
 };
+

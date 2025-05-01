@@ -2,15 +2,42 @@ import React, { useState, useEffect } from "react";
 import "./VideoPlayer.css";
 import { useUser } from "../context/UserContext";
 import { Navigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 const VideoPlayer = () => {
   const { user, setUser } = useUser();
+  const [showPrompt, setShowPrompt] = useState('No');
   if (!user) {
     return <Navigate to="/auth" />;
   }
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [sockeInstance, setSocketInstance] = useState(null);
+
+  
+  const handlePrompt = (e)=>{
+    console.log(e.target.innerText);
+    setShowPrompt('Answered')
+    if(e.target.innerText === 'Yes') return;
+    setUser(prevData=>{
+      const updatedVideoData = prevData.videodata.map((video) => {
+        if (video.videoId === "video456") {
+          return {
+            ...video,
+            resumePoint:0,
+          };
+        }
+        return video;
+      });
+
+      return {
+        ...prevData,
+        videodata: updatedVideoData,
+      };      
+    })
+  }
 
   const mergeIntervals = (existingIntervals, newInterval) => {
     const allIntervals = [...existingIntervals, newInterval];
@@ -51,9 +78,9 @@ const VideoPlayer = () => {
     });
   };
 
-  const endInterval = (enTime, resumePoint=null) => {
+  const endInterval = (enTime, resumePoint = null) => {
     const targetVideo = user.videodata[0];
-    if(targetVideo.watchedIntervals.length === 0) return;
+    if (targetVideo.watchedIntervals.length === 0) return;
     let lastInterval = targetVideo.watchedIntervals.pop();
     lastInterval = { ...lastInterval, end: enTime };
 
@@ -120,54 +147,94 @@ const VideoPlayer = () => {
   };
 
   useEffect(() => {
-    const video = document.querySelector(".video-element");    
+    if(showPrompt!='Answered') return;
+    const video = document.querySelector(".video-element");
     video.currentTime = user.videodata[0].resumePoint;
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", () =>
-      setProgress((user.videodata[0].resumePoint / user.videodata[0].videoLength) * 100)
+      setProgress(
+        (user.videodata[0].resumePoint / user.videodata[0].videoLength) * 100
+      )
     );
-    
+
     const handleVideoEnd = () => {
       endInterval(video.duration);
       setIsPlaying(false);
     };
     video.addEventListener("ended", handleVideoEnd);
-    
-    const timer = setTimeout(() => {
-      setShowSkeleton(false);
-    }, 4000);
-
-      // const periodicTime = setInterval(() => {
-      //   console.log(video.currentTime);
-      // }, 5000);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("ended", handleVideoEnd);
+    };
+  }, [showPrompt]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 4000);
+
+    if (user.videodata[0].resumePoint > 0) {
+      setShowPrompt("Show");
+    }
+    const video = document.querySelector(".video-element");
+    const socket = io("http://localhost:3000", {
+      query: {
+        email: user.email,
+      },
+    });
+    setSocketInstance(socket);
+
+    const PeriodicTime = setInterval(() => {
+      socket.emit("resume-point", video.currentTime);
+    }, 5000);
+
+    return () => {
+      clearInterval(PeriodicTime);
+      socket.disconnect();
+      setSocketInstance(null);
       clearTimeout(timer);
     };
   }, []);
 
   const getTrueProgress = () => {
-    const metric = user.videodata[0].watchedIntervals.reduce((acc, interval) => {
-      return acc + (interval.end - interval.start);
-    }, 0);
+    const metric = user.videodata[0].watchedIntervals.reduce(
+      (acc, interval) => {
+        return acc + (interval.end - interval.start);
+      },
+      0
+    );
     return ((metric / user.videodata[0].videoLength) * 100).toFixed(2);
   };
 
-  useEffect(()=>{
-    console.log(user);
-  },[user])
+  useEffect(() => {
+    if (!sockeInstance) return;
+    sockeInstance.emit("updates", user.videodata);
+  }, [user]);
 
   return (
     <div className="player" style={{ position: "relative" }}>
-      <div className="video-container">
+      {showPrompt==="Show" && 
+      <div className="prompt-container">
+        <div className="prompt" >
+          <p>Do you want to resume the video from where you left off?</p>
+          <div className="buttons">
+            <button className="no-btn" onClick={e=>handlePrompt(e)}>No</button>
+            <button className="yes-btn" onClick={e=>handlePrompt(e)}>Yes</button>
+          </div>
+        </div>
+      </div>}
+      <div className="video-container" style={{pointerEvents:showPrompt==="Show"?"none":''}}>
         <div className="video-wrapper">
           <video
             className="video-element"
             width="100%"
             src="Madeira_Cinematic FPV.mp4"
             controls={false}
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
+            disableRemotePlayback
+            onContextMenu={(e) => e.preventDefault()}
           />
           <p className="video-credit">
             Video credit:{" "}
@@ -191,7 +258,8 @@ const VideoPlayer = () => {
             {user.videodata[0].watchedIntervals.map((interval, index) => {
               const startPercent =
                 (interval.start / user.videodata[0].videoLength) * 100;
-              const endPercent = (interval.end / user.videodata[0].videoLength) * 100;
+              const endPercent =
+                (interval.end / user.videodata[0].videoLength) * 100;
               const widthPercent = endPercent - startPercent;
               return (
                 <div

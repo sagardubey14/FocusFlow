@@ -147,6 +147,61 @@
   border-radius: 50%;
 }
 
+.prompt-container {
+  position: fixed;
+  top: 10;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background-color: white;
+  padding: 10px 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.prompt {
+  display: inline-block;
+  background-color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.prompt p {
+  margin: 0 0 10px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.no-btn, .yes-btn {
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.no-btn {
+  background-color: red;
+  color: white;
+}
+
+.yes-btn {
+  background-color: green;
+  color: white;
+}
+
+.no-btn:hover {
+  background-color: darkred;
+}
+
+.yes-btn:hover {
+  background-color: darkgreen;
+}
+
 
 @keyframes pulse {
   0% {
