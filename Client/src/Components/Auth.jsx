@@ -31,7 +31,7 @@ function Auth() {
     setSuccess(null);
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", login, {
+      const res = await axios.post("https://focusflow-ctzr.onrender.com/api/users/login", login, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Login Success:", res.data);
@@ -55,7 +55,7 @@ function Auth() {
       return;
     }
     try {
-      const res = await axios.post("http://localhost:3000/api/users/register", register, {
+      const res = await axios.post("https://focusflow-ctzr.onrender.com/api/users/register", register, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Register Success:", res.data);

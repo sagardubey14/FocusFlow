@@ -178,7 +178,7 @@ const VideoPlayer = () => {
       setShowPrompt("Show");
     }
     const video = document.querySelector(".video-element");
-    const socket = io("http://localhost:3000", {
+    const socket = io("https://focusflow-ctzr.onrender.com", {
       query: {
         email: user.email,
       },
