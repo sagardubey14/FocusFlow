@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./VideoPlayer.css";
+import { useUser } from "../context/UserContext";
+import { Navigate } from "react-router-dom";
 
 const VideoPlayer = () => {
+  const { user, setUser } = useUser();
+  if (!user) {
+    return <Navigate to="/auth" />;
+  }
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [userData, setUserData] = useState({
-    userId: "user123",
-    videoId: "video456",
-    watchedIntervals: [
-      { start: 0, end: 50 },
-      { start: 60, end: 200 },
-    ],
-    resumePoint: 200,
-    videoLength: 224.327982,
-  });
 
   const mergeIntervals = (existingIntervals, newInterval) => {
     const allIntervals = [...existingIntervals, newInterval];
@@ -34,27 +30,54 @@ const VideoPlayer = () => {
   };
 
   const startInterval = (stTime, enTime) => {
-    setUserData((prevData) => {
+    setUser((prevData) => {
+      const updatedVideoData = prevData.videodata.map((video) => {
+        if (video.videoId === "video456") {
+          return {
+            ...video,
+            watchedIntervals: [
+              ...video.watchedIntervals,
+              { start: stTime, end: enTime },
+            ],
+          };
+        }
+        return video;
+      });
+
       return {
         ...prevData,
-        watchedIntervals: [
-          ...prevData.watchedIntervals,
-          { start: stTime, end: enTime },
-        ],
+        videodata: updatedVideoData,
       };
     });
   };
 
-  const endInterval = (enTime) => {
-    let lastInterval = userData.watchedIntervals.pop();
+  const endInterval = (enTime, resumePoint=null) => {
+    const targetVideo = user.videodata[0];
+    if(targetVideo.watchedIntervals.length === 0) return;
+    let lastInterval = targetVideo.watchedIntervals.pop();
     lastInterval = { ...lastInterval, end: enTime };
-    setUserData((prevData) => {
+
+    setUser((prevData) => {
+      const updatedVideoData = prevData.videodata.map((video) => {
+        if (video.videoId === "video456") {
+          return {
+            ...video,
+            watchedIntervals: mergeIntervals(
+              video.watchedIntervals,
+              lastInterval
+            ),
+          };
+        }
+        return video;
+      });
+
+      if (resumePoint !== null) {
+        updatedVideoData[0].resumePoint = resumePoint;
+      }
+
       return {
         ...prevData,
-        watchedIntervals: mergeIntervals(
-          prevData.watchedIntervals,
-          lastInterval
-        ),
+        videodata: updatedVideoData,
       };
     });
   };
@@ -67,7 +90,7 @@ const VideoPlayer = () => {
       setIsPlaying(true);
     } else {
       video.pause();
-      endInterval(video.currentTime);
+      endInterval(video.currentTime, video.currentTime);
       setIsPlaying(false);
     }
   };
@@ -97,20 +120,26 @@ const VideoPlayer = () => {
   };
 
   useEffect(() => {
-    const video = document.querySelector(".video-element");
-    video.currentTime = userData.resumePoint;
+    const video = document.querySelector(".video-element");    
+    video.currentTime = user.videodata[0].resumePoint;
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", () =>
-      setProgress((userData.resumePoint / userData.videoLength) * 100)
+      setProgress((user.videodata[0].resumePoint / user.videodata[0].videoLength) * 100)
     );
+    
     const handleVideoEnd = () => {
       endInterval(video.duration);
       setIsPlaying(false);
     };
     video.addEventListener("ended", handleVideoEnd);
+    
     const timer = setTimeout(() => {
       setShowSkeleton(false);
-    }, 5000);
+    }, 4000);
+
+      // const periodicTime = setInterval(() => {
+      //   console.log(video.currentTime);
+      // }, 5000);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -120,11 +149,15 @@ const VideoPlayer = () => {
   }, []);
 
   const getTrueProgress = () => {
-    const metric = userData.watchedIntervals.reduce((acc, interval) => {
+    const metric = user.videodata[0].watchedIntervals.reduce((acc, interval) => {
       return acc + (interval.end - interval.start);
     }, 0);
-    return ((metric / userData.videoLength) * 100).toFixed(2);
+    return ((metric / user.videodata[0].videoLength) * 100).toFixed(2);
   };
+
+  useEffect(()=>{
+    console.log(user);
+  },[user])
 
   return (
     <div className="player" style={{ position: "relative" }}>
@@ -155,10 +188,10 @@ const VideoPlayer = () => {
           </div>
 
           <div className="progress-bar" onClick={handleProgressBarClick}>
-            {userData.watchedIntervals.map((interval, index) => {
+            {user.videodata[0].watchedIntervals.map((interval, index) => {
               const startPercent =
-                (interval.start / userData.videoLength) * 100;
-              const endPercent = (interval.end / userData.videoLength) * 100;
+                (interval.start / user.videodata[0].videoLength) * 100;
+              const endPercent = (interval.end / user.videodata[0].videoLength) * 100;
               const widthPercent = endPercent - startPercent;
               return (
                 <div
@@ -187,6 +220,7 @@ const VideoPlayer = () => {
           </div>
         </div>
       </div>
+
       <div
         className="video-container"
         style={{
