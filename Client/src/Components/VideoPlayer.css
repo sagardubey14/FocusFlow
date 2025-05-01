@@ -1,23 +1,45 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  font-family: Arial, sans-serif;
+  color: #e0f7fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .video-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 80%;
   padding: 20px;
-  background-color: black;
+  overflow-x: hidden;
+  margin-left: 10%;
+  background-color: #000;
 }
 
 .video-wrapper {
   position: relative;
-  width: 90%;
-  max-width: 800px;
-  border: 1px solid #444;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #1e88e5;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #1a1a1a;
+  background-color: #111;
+  aspect-ratio: 16 / 9;
 }
 
 .video-element {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -25,80 +47,84 @@
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #ccc;
+  background: rgba(30, 136, 229, 0.5);
+  color: #e0f7fa;
   padding: 4px 8px;
   font-size: 12px;
   border-radius: 4px;
 }
 
+.ytname{
+  color: white;
+}
+
 .controls-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-top: 16px;
-  width: 90%;
-  max-width: 800px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 20px;
 }
 
 .button-group {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .button-group button {
-  padding: 6px 12px;
+  padding: 8px 16px;
   font-size: 14px;
-  max-width: max-content;
-  border: 1px solid #555;
-  background-color: #222;
-  color: #eee;
+  border: 1px solid #90caf9;
+  background-color: #1e88e5;
+  color: #fff;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .button-group button:hover {
-  background-color: #333;
+  background-color: #1565c0;
 }
 
 .progress-bar {
   flex-grow: 1;
-  height: 8px;
-  background-color: #333;
+  height: 10px;
+  background-color: #222;
   position: relative;
   border-radius: 4px;
   overflow: hidden;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .watched-segment {
   position: absolute;
   top: 0;
   height: 100%;
-  background-color: rgb(183, 220, 91);
+  background-color: #e4dd0b;
   z-index: 1;
 }
 
 .progress {
   height: 100%;
-  background-color: #2196f3;
+  background-color: #1e88e5;
   transition: width 0.3s ease;
 }
 
 .circular-progress {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
 }
 
 .circle {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #4caf50;
+  background: #1e88e5;
 }
 
 .progress-text {
@@ -107,19 +133,19 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 12px;
-  color: #ccc;
+  color: #e0f7fa;
 }
 
 .skeleton {
-  background-color: #2a2a2a;
+  background-color: #1a1a1a;
   animation: pulse 1.5s infinite ease-in-out;
 }
 
-.skeleton-video .video-element,
-.skeleton.video-element {
+.skeleton-video {
   width: 100%;
-  height: 450px;
+  aspect-ratio: 16 / 9;
   border-radius: 8px;
+  background-color: #2a2a2a;
 }
 
 .skeleton-text {
@@ -127,45 +153,107 @@
   width: 80px;
   margin-top: 10px;
   border-radius: 4px;
+  background-color: #333;
 }
 
 .skeleton-button {
   width: 50px;
   height: 30px;
   border-radius: 4px;
+  background-color: #333;
 }
 
 .skeleton-progress {
   width: 100%;
   height: 8px;
   border-radius: 4px;
+  background-color: #333;
 }
 
 .skeleton-circle {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
+  background-color: #333;
 }
 
+.prompt-container {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background-color: #111;
+  padding: 10px 0;
+  text-align: center;
+  z-index: 10;
+  color: #e0f7fa;
+  border: 1px solid #1e88e5;
+  border-radius: 6px;
+}
+
+.prompt {
+  background-color: #111;
+  padding: 15px 20px;
+  /* border-radius: 5px; */
+  box-shadow: 0px 4px 10px rgba(30, 136, 229, 0.3);
+}
+
+.prompt p {
+  margin: 0 0 10px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.no-btn,
+.yes-btn {
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.no-btn {
+  background-color: #e53935;
+}
+
+.yes-btn {
+  background-color: #43a047;
+}
+
+.no-btn:hover {
+  background-color: #b71c1c;
+}
+
+.yes-btn:hover {
+  background-color: #2e7d32;
+}
 
 @keyframes pulse {
-  0% {
-    background-color: #2a2a2a;
+  0%, 100% {
+    background-color: #1a1a1a;
   }
   50% {
-    background-color: #3a3a3a;
-  }
-  100% {
     background-color: #2a2a2a;
   }
 }
 
-
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
   .controls-row {
     flex-direction: column;
     align-items: stretch;
+    padding: 0 10px;
   }
+
+  .button-group {
+    justify-content: center;
+  }
+
   .progress-bar {
     width: 100%;
     margin: 10px 0;
@@ -173,11 +261,6 @@
 
   .circular-progress {
     align-self: center;
-  }
-  .skeleton-video .video-element,
-  .skeleton.video-element {
-    width: 100%;
-    height: 323px;
-    border-radius: 8px;
+    margin: 10px auto;
   }
 }

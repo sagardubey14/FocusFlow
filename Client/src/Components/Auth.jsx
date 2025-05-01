@@ -35,7 +35,7 @@ function Auth() {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Login Success:", res.data);
-      setUser(res.data.user);
+      setUser({...res.data.user, email:login.email});
       setSuccess("Login Successfully redirecting to Video!")
       setTimeout(()=>{
         navigate('/video');
