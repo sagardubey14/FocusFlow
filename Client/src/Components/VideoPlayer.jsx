@@ -239,6 +239,7 @@ const VideoPlayer = () => {
           <p className="video-credit">
             Video credit:{" "}
             <a
+              className="ytname"
               href="https://youtu.be/NcBjx_eyvxc"
               target="_blank"
               rel="noopener noreferrer"
@@ -319,7 +320,6 @@ const VideoPlayer = () => {
 
           <div className="circular-progress">
             <div className="circle skeleton-circle" />
-            <span className="progress-text skeleton-text" />
           </div>
         </div>
       </div>
