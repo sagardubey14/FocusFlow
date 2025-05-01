@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./VideoPlayer.css";
+import { useUser } from "../context/UserContext";
+import { Navigate } from "react-router-dom";
 
 const VideoPlayer = () => {
+  const {user, setUser} = useUser();
+  if(!user){
+    return <Navigate to="/auth" />;
+  }
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [progress, setProgress] = useState(0);
