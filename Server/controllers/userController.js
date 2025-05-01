@@ -63,23 +63,5 @@ const loginUser = async (req, res) => {
   }
 };
 
-const updateVideoDataByEmail = async (email, newVideoData)=> {
-  try {
-    const user = await User.findOne({ email });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
-    user.videoData = newVideoData.map(({ _id, ...rest }) => ({
-      ...rest,
-    }));
-    
-    const updatedUser = await user.save();
-    return updatedUser;
-  } catch (error) {
-    console.error('Error updating videoData:', error.message);
-    throw error;
-  }
-}
-
-module.exports = { registerUser, loginUser, updateVideoDataByEmail };
+module.exports = { registerUser, loginUser };
