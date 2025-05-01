@@ -1,11 +1,13 @@
 import React from 'react'
 import './App.css'
 import VideoPlayer from './Components/VideoPlayer'
+import Auth from './Components/Auth'
 
 function App() {
   return (
     <div className='app'>
-      <VideoPlayer />
+      <Auth />
+      {/* <VideoPlayer /> */}
     </div>
   )
 }
